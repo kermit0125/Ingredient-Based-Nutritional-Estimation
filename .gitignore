@@ -1,0 +1,43 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.eggs/
+dist/
+build/
+*.so
+.Python
+.venv/
+venv/
+.env
+.env.*
+
+# IDE / OS
+.idea/
+.vscode/
+*.swp
+.DS_Store
+Thumbs.db
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Training / inference artifacts (do not version weights or run logs)
+runs/
+wandb/
+*.pt
+*.pth
+*.onnx
+*.engine
+mlruns/
+
+# Local dataset blobs — regenerate with backend/scripts (see backend/data/DATA_SOURCES.md)
+backend/data/raw/
+backend/data/filtered/
+backend/data/splits/
+backend/data/augmented/
+backend/data/dataset.yaml
+
+# Optional local validation outputs
+backend/test/
