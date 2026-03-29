@@ -1,0 +1,28 @@
+# YOLOv8 detection training — same layout as data/dataset.yaml, referenced from configs/.
+# path is relative to this file (backend/configs/).
+#
+# From backend/:
+#   yolo detect train model=yolov8m.pt data=data/dataset.yaml ...
+#   yolo detect train model=yolov8m.pt data=configs/train_detect.yaml ...
+#
+# train must list BOTH splits/train and augmented/train; augmented images are extra only.
+path: ../data
+train:
+  - splits/train/images
+  - augmented/train/images
+val: splits/val/images
+test: splits/test/images
+nc: 12
+names:
+  - bell_pepper
+  - tomato
+  - onion
+  - potato
+  - mushroom
+  - carrot
+  - broccoli
+  - cucumber
+  - corn
+  - egg
+  - garlic
+  - chilli
