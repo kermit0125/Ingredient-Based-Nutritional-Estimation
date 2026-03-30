@@ -89,7 +89,7 @@
   "data": {
     "status": "ok",
     "model_loaded": true,
-    "supported_classes_count": 12
+    "supported_classes_count": 10
   }
 }
 ```

@@ -14,7 +14,7 @@
     ├── README.md                  # 指向根目录与 data 说明
     ├── requirements.txt
     ├── configs/
-    │   ├── classes.yaml           # 12 类 + 双数据集 raw 名映射
+    │   ├── classes.yaml           # 10 类 + 双数据集 raw 名映射（不含 garlic/chilli）
     │   └── train_detect.yaml      # YOLO 检测数据路径（splits + augmented）
     │
     ├── scripts/                   # 数据准备（当前已实现）

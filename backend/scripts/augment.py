@@ -262,10 +262,13 @@ def main() -> None:
     if not args.inplace:
         print(
             f"augmentation dir: {out_images.parent}; "
-            f"refreshed data/dataset.yaml (splits/train + augmented/train)."
+            f"refreshed data/dataset.yaml and data/splits/data.yaml (splits/train + augmented/train)."
         )
     else:
-        print("refreshed data/dataset.yaml (--inplace: verify you are not double-counting train paths).")
+        print(
+            "refreshed data/dataset.yaml and data/splits/data.yaml "
+            "(--inplace: verify you are not double-counting train paths)."
+        )
 
 
 if __name__ == "__main__":

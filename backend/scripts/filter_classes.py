@@ -1,6 +1,6 @@
 """
-Filter two Roboflow YOLOv8 exports to the 12 classes in configs/classes.yaml,
-remap IDs to 0..11, merge images + labels into data/filtered/ (ds1_/ds2_ prefixes).
+Filter two Roboflow YOLOv8 exports to the 10 classes in configs/classes.yaml,
+remap IDs to 0..9, merge images + labels into data/filtered/ (ds1_/ds2_ prefixes).
 
 Run from backend/:
     python scripts/filter_classes.py
@@ -137,7 +137,7 @@ def write_filtered_data_yaml(out_dir: Path, class_cfg: dict) -> None:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Filter and merge 12 classes into data/filtered/")
+    parser = argparse.ArgumentParser(description="Filter and merge 10 classes into data/filtered/")
     parser.add_argument("--config", type=Path, default=CONFIG_PATH, help="Path to classes.yaml")
     parser.add_argument(
         "--out",

@@ -9,7 +9,7 @@ import yaml
 
 BACKEND_ROOT = Path(__file__).resolve().parent.parent
 CONFIG_PATH = BACKEND_ROOT / "configs" / "classes.yaml"
-DATASET_YAML_PATH = BACKEND_ROOT / "data" / "dataset.yaml"
+DATASET_YAML_PATH = BACKEND_ROOT / "data" / "splits" / "data.yaml"
 
 IMG_EXTS = (".jpg", ".jpeg", ".png", ".bmp", ".webp", ".tif", ".tiff")
 
@@ -104,26 +104,45 @@ def write_training_dataset_yaml(
     config_path: Path | None = None,
 ) -> Path:
     """
-    Write data/dataset.yaml: train lists splits/train and augmented/train (supplement only).
-    Ultralytics resolves path relative to this yaml (backend/data/).
+    Write data/dataset.yaml and data/splits/data.yaml.
+    Omit explicit path: Ultralytics uses the yaml file's parent as dataset root (see check_det_dataset).
+    - data/dataset.yaml: root = backend/data/
+    - data/splits/data.yaml: root = backend/data/splits/, train/val use ../ to reach splits/ and augmented/.
     """
     root = (data_root or (BACKEND_ROOT / "data")).resolve()
     cfg = class_cfg if class_cfg is not None else load_classes_config(config_path)
     names = cfg["canonical_order"]
-    lines = [
-        "# YOLO Ultralytics — path relative to this file (backend/data/).",
-        "# train: original split + augmented-only images (do not remove splits/train).",
-        "path: .",
+    nc = cfg["nc"]
+
+    lines_root = [
+        "# YOLO Ultralytics — yaml 位于 backend/data/，省略 path 则根目录为本文件目录。",
+        "# train: splits 原始 + augmented 增补。",
         "train:",
         "  - splits/train/images",
         "  - augmented/train/images",
         "val: splits/val/images",
         "test: splits/test/images",
-        f"nc: {cfg['nc']}",
+        f"nc: {nc}",
         "names:",
     ]
     for n in names:
-        lines.append(f"  - {n}")
-    out = root / "dataset.yaml"
-    out.write_text("\n".join(lines) + "\n", encoding="utf-8")
+        lines_root.append(f"  - {n}")
+    (root / "dataset.yaml").write_text("\n".join(lines_root) + "\n", encoding="utf-8")
+
+    lines_splits = [
+        "# Ultralytics 唯一推荐入口：yaml 位于 backend/data/splits/，根目录 = data/splits/。",
+        "train:",
+        "  - ../splits/train/images",
+        "  - ../augmented/train/images",
+        "val: ../splits/val/images",
+        "test: ../splits/test/images",
+        f"nc: {nc}",
+        "names:",
+    ]
+    for n in names:
+        lines_splits.append(f"  - {n}")
+    splits_dir = root / "splits"
+    splits_dir.mkdir(parents=True, exist_ok=True)
+    out = splits_dir / "data.yaml"
+    out.write_text("\n".join(lines_splits) + "\n", encoding="utf-8")
     return out

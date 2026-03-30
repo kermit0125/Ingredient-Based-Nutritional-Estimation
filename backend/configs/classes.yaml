@@ -1,7 +1,8 @@
-# Unified 12-class detection labels (shared by scripts/ and training configs).
+# Unified 10-class detection labels (shared by scripts/ and training configs).
 # ds1: FOOD-INGREDIENTS (Roboflow names, mixed English / regional).
 # ds2: Food ingredient recognition (lowercase names).
-nc: 12
+# Garlic and chilli are excluded: typical serving amounts yield negligible macro totals for nutrition estimation.
+nc: 10
 names:
   0: bell_pepper
   1: tomato
@@ -13,15 +14,13 @@ names:
   7: cucumber
   8: corn
   9: egg
-  10: garlic
-  11: chilli
 
 # Raw Roboflow class name -> canonical name above (builds raw_class_id -> unified_id).
 sources:
   ds1:
     path: data/raw/FOOD-INGREDIENTS dataset.v4i.yolov8
     file_prefix: ds1_
-    # Capsicum == ds2 "bell pepper"; Chili Pepper -Khursani- == ds2 "chilli"
+    # Capsicum == ds2 "bell pepper"
     raw_to_canonical:
       Capsicum: bell_pepper
       Tomato: tomato
@@ -33,8 +32,6 @@ sources:
       Cucumber: cucumber
       Corn: corn
       Egg: egg
-      Garlic: garlic
-      Chili Pepper -Khursani-: chilli
   ds2:
     path: data/raw/Food ingredient recognition.v4i.yolov8
     file_prefix: ds2_
@@ -49,5 +46,3 @@ sources:
       cucumber: cucumber
       corn: corn
       egg: egg
-      garlic: garlic
-      chilli: chilli

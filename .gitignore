@@ -35,9 +35,11 @@ mlruns/
 # Local dataset blobs — regenerate with backend/scripts (see backend/data/DATA_SOURCES.md)
 backend/data/raw/
 backend/data/filtered/
-backend/data/splits/
+backend/data/splits/train/
+backend/data/splits/val/
+backend/data/splits/test/
 backend/data/augmented/
-backend/data/dataset.yaml
+# dataset YAML templates are tracked; image/label dirs above stay ignored
 
 # Optional local validation outputs
 backend/test/

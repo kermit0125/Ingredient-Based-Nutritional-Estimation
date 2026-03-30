@@ -1,28 +1,27 @@
-# YOLOv8 detection training — same layout as data/dataset.yaml, referenced from configs/.
-# path is relative to this file (backend/configs/).
-#
-# From backend/:
-#   yolo detect train model=yolov8m.pt data=data/dataset.yaml ...
-#   yolo detect train model=yolov8m.pt data=configs/train_detect.yaml ...
-#
-# train must list BOTH splits/train and augmented/train; augmented images are extra only.
-path: ../data
-train:
-  - splits/train/images
-  - augmented/train/images
-val: splits/val/images
-test: splits/test/images
-nc: 12
-names:
-  - bell_pepper
-  - tomato
-  - onion
-  - potato
-  - mushroom
-  - carrot
-  - broccoli
-  - cucumber
-  - corn
-  - egg
-  - garlic
-  - chilli
+# YOLOv8 检测训练 — 仅超参数；数据集见 data/splits/data.yaml。
+# 从 backend/ 运行: python models/train_detect.py
+
+model: yolov8m.pt
+# 相对 backend/（与 models/train_detect.py 中 BACKEND_ROOT 拼接方式一致）
+data: data/splits/data.yaml
+
+epochs: 100
+batch: 32
+imgsz: 640
+device: "0"
+workers: 4
+
+optimizer: AdamW
+lr0: 0.001
+lrf: 0.01
+momentum: 0.937
+weight_decay: 0.0005
+warmup_epochs: 3.0
+
+patience: 20
+exist_ok: true
+plots: true
+save: true
+
+project: runs/detect
+name: exp1
