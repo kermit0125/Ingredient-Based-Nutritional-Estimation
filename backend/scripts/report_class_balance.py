@@ -1,14 +1,3 @@
-"""
-Print per-class image counts and instance (box) counts for train-related folders.
-
-Compares:
-  - data/splits/train (original split)
-  - data/augmented/train (augmented-only; skew vs split is expected)
-
-Run from backend/:
-    python scripts/report_class_balance.py
-"""
-
 from __future__ import annotations
 
 import argparse
@@ -24,7 +13,6 @@ from dataset_common import BACKEND_ROOT, CONFIG_PATH, find_image_for_stem, load_
 
 
 def scan_labels(labels_dir: Path, images_dir: Path, nc: int) -> tuple[dict[int, int], dict[int, int]]:
-    """Returns (instances_per_class, images_with_class). Only labels paired with an image."""
     inst: dict[int, int] = defaultdict(int)
     img_hit: dict[int, set[str]] = defaultdict(set)
 
@@ -64,7 +52,7 @@ def scan_labels(labels_dir: Path, images_dir: Path, nc: int) -> tuple[dict[int, 
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Class balance report for train + augmented")
+    parser = argparse.ArgumentParser()
     parser.add_argument("--config", type=Path, default=CONFIG_PATH)
     args = parser.parse_args()
 

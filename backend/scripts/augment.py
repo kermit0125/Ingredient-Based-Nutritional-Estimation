@@ -1,17 +1,3 @@
-"""
-Albumentations augmentation for train images that contain broccoli or cucumber,
-until each class hits a target image count (default 160; original + augmented).
-
-Writes to data/augmented/train/ by default; use --inplace to append splits/train.
-Only stems whose labels already contain the focus class are augmented; bboxes are
-transformed with the image (class ids unchanged).
-
-Run from backend/:
-    pip install -r requirements.txt
-    python scripts/augment.py
-    python scripts/augment.py --target 160 --min-aug 3 --max-aug 6
-"""
-
 from __future__ import annotations
 
 import argparse
@@ -120,7 +106,6 @@ def aug_variants_per_image(
     min_aug: int,
     max_aug: int,
 ) -> int:
-    """k augmentations per base image to approach target total image count for that class."""
     if n_base_images <= 0:
         return 0
     if n_with_class_total >= target:
@@ -132,34 +117,17 @@ def aug_variants_per_image(
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Augment broccoli/cucumber train samples")
+    parser = argparse.ArgumentParser()
     parser.add_argument("--config", type=Path, default=CONFIG_PATH)
     parser.add_argument("--train-images", type=Path, default=BACKEND_ROOT / "data" / "splits" / "train" / "images")
     parser.add_argument("--train-labels", type=Path, default=BACKEND_ROOT / "data" / "splits" / "train" / "labels")
-    parser.add_argument(
-        "--out-images",
-        type=Path,
-        default=BACKEND_ROOT / "data" / "augmented" / "train" / "images",
-    )
-    parser.add_argument(
-        "--out-labels",
-        type=Path,
-        default=BACKEND_ROOT / "data" / "augmented" / "train" / "labels",
-    )
-    parser.add_argument(
-        "--target",
-        type=int,
-        default=160,
-        help="Target images containing the class (original train + augmented)",
-    )
-    parser.add_argument("--min-aug", type=int, default=3, help="Minimum augmentations per base image when boosting")
-    parser.add_argument("--max-aug", type=int, default=6, help="Maximum augmentations per base image")
+    parser.add_argument("--out-images", type=Path, default=BACKEND_ROOT / "data" / "augmented" / "train" / "images")
+    parser.add_argument("--out-labels", type=Path, default=BACKEND_ROOT / "data" / "augmented" / "train" / "labels")
+    parser.add_argument("--target", type=int, default=160)
+    parser.add_argument("--min-aug", type=int, default=3)
+    parser.add_argument("--max-aug", type=int, default=6)
     parser.add_argument("--seed", type=int, default=42)
-    parser.add_argument(
-        "--inplace",
-        action="store_true",
-        help="Write into splits/train instead of augmented/train",
-    )
+    parser.add_argument("--inplace", action="store_true")
     args = parser.parse_args()
 
     cfg = load_classes_config(args.config)

@@ -1,11 +1,3 @@
-"""
-Split data/filtered/ into data/splits/ (80/10/10) with multilabel stratification.
-
-Run from backend/:
-    python scripts/split_dataset.py
-    python scripts/split_dataset.py --seed 42
-"""
-
 from __future__ import annotations
 
 import argparse
@@ -111,7 +103,7 @@ def write_splits_yaml(out_root: Path, class_cfg: dict) -> None:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="80/10/10 multilabel stratified split")
+    parser = argparse.ArgumentParser()
     parser.add_argument("--config", type=Path, default=CONFIG_PATH)
     parser.add_argument("--filtered", type=Path, default=BACKEND_ROOT / "data" / "filtered")
     parser.add_argument("--out", type=Path, default=BACKEND_ROOT / "data" / "splits")

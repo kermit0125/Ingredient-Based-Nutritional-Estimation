@@ -1,5 +1,3 @@
-"""Shared helpers: paths, YOLO label I/O, classes.yaml parsing."""
-
 from __future__ import annotations
 
 from pathlib import Path
@@ -89,7 +87,6 @@ def label_stems(labels_dir: Path) -> list[str]:
 
 
 def ensure_augmented_train_dirs(data_root: Path | None = None) -> tuple[Path, Path]:
-    """Create augmented/train dirs so the second train path in dataset.yaml always exists."""
     root = data_root or (BACKEND_ROOT / "data")
     im = root / "augmented" / "train" / "images"
     lb = root / "augmented" / "train" / "labels"
@@ -103,20 +100,12 @@ def write_training_dataset_yaml(
     class_cfg: dict | None = None,
     config_path: Path | None = None,
 ) -> Path:
-    """
-    Write data/dataset.yaml and data/splits/data.yaml.
-    Omit explicit path: Ultralytics uses the yaml file's parent as dataset root (see check_det_dataset).
-    - data/dataset.yaml: root = backend/data/
-    - data/splits/data.yaml: root = backend/data/splits/, train/val use ../ to reach splits/ and augmented/.
-    """
     root = (data_root or (BACKEND_ROOT / "data")).resolve()
     cfg = class_cfg if class_cfg is not None else load_classes_config(config_path)
     names = cfg["canonical_order"]
     nc = cfg["nc"]
 
     lines_root = [
-        "# YOLO Ultralytics — yaml 位于 backend/data/，省略 path 则根目录为本文件目录。",
-        "# train: splits 原始 + augmented 增补。",
         "train:",
         "  - splits/train/images",
         "  - augmented/train/images",
@@ -130,7 +119,6 @@ def write_training_dataset_yaml(
     (root / "dataset.yaml").write_text("\n".join(lines_root) + "\n", encoding="utf-8")
 
     lines_splits = [
-        "# Ultralytics 唯一推荐入口：yaml 位于 backend/data/splits/，根目录 = data/splits/。",
         "train:",
         "  - ../splits/train/images",
         "  - ../augmented/train/images",

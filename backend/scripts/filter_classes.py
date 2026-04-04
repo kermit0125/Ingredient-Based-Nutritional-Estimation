@@ -1,12 +1,3 @@
-"""
-Filter two Roboflow YOLOv8 exports to the 10 classes in configs/classes.yaml,
-remap IDs to 0..9, merge images + labels into data/filtered/ (ds1_/ds2_ prefixes).
-
-Run from backend/:
-    python scripts/filter_classes.py
-    python scripts/filter_classes.py --no-clean
-"""
-
 from __future__ import annotations
 
 import argparse
@@ -30,7 +21,6 @@ from dataset_common import (
 
 
 def build_raw_id_map(names: list[str], raw_to_canonical: dict, canonical_to_id: dict) -> dict[int, int]:
-    """Map raw class index from data.yaml -> unified id."""
     name_to_idx = {n: i for i, n in enumerate(names)}
     out: dict[int, int] = {}
     for raw_name, canonical in raw_to_canonical.items():
@@ -68,7 +58,6 @@ def process_source(
     out_images: Path,
     out_labels: Path,
 ) -> tuple[int, int, int]:
-    """Returns (written_samples, skipped_empty_labels, missing_image)."""
     rel = Path(source_cfg["path"])
     root = (BACKEND_ROOT / rel).resolve()
     data_yaml = root / "data.yaml"
@@ -128,7 +117,6 @@ def process_source(
 
 
 def write_filtered_data_yaml(out_dir: Path, class_cfg: dict) -> None:
-    """Write nc/names only; full training paths come from split_dataset + dataset.yaml."""
     names = class_cfg["names"]
     lines = [f"nc: {class_cfg['nc']}", "names:"]
     for k in sorted(int(x) for x in names):
@@ -137,15 +125,10 @@ def write_filtered_data_yaml(out_dir: Path, class_cfg: dict) -> None:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Filter and merge 10 classes into data/filtered/")
-    parser.add_argument("--config", type=Path, default=CONFIG_PATH, help="Path to classes.yaml")
-    parser.add_argument(
-        "--out",
-        type=Path,
-        default=BACKEND_ROOT / "data" / "filtered",
-        help="Output root (contains images/ and labels/)",
-    )
-    parser.add_argument("--no-clean", action="store_true", help="Do not delete existing filtered/ before run")
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--config", type=Path, default=CONFIG_PATH)
+    parser.add_argument("--out", type=Path, default=BACKEND_ROOT / "data" / "filtered")
+    parser.add_argument("--no-clean", action="store_true")
     args = parser.parse_args()
 
     class_cfg = load_classes_config(args.config)

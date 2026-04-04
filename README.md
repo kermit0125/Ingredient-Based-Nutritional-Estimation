@@ -1,65 +1,39 @@
-# Ingredient-Based Nutritional Estimation
+# Ingredient Nutrition Estimation (INE)
 
-## About / 项目简介
+[简体中文说明](README_Chinese.md)
 
-**English:** Course project **INE (Ingredient Nutrition Estimator)** — estimate macros and calories from photos of raw ingredients. **Phase 1** (this milestone) delivers **dataset preprocessing**, **YOLOv8 object detection** training, validation, a **per-100g nutrition CSV**, and a **local HTML dashboard** under `Visualization/`. **Trained weights and `runs/` logs are not in Git** (see `.gitignore`); clone the repo and train locally following the steps below.
+This project identifies **raw ingredient** categories from photos, estimates each instance’s **share of the image** using **instance segmentation or detection boxes**, converts that to an **approximate mass in grams**, and computes **calories, carbohydrates, protein, and fat** from a nutrition table—including **per-image totals**. It is meant for quick meal-prep or food-logging style estimates, **not** precision scale measurements.
 
-**中文：** 课程项目「食材营养识别」：对**烹饪前生鲜食材**做类别检测，并结合营养表输出每 100g 宏量营养（Level 1）。本阶段包含数据管线、YOLOv8 检测训练与评估脚本；**权重与训练产物需本地生成**，按下文「训练方法」操作即可。
-
-**Remote:** [github.com/kermit0125/Ingredient-Based-Nutritional-Estimation](https://github.com/kermit0125/Ingredient-Based-Nutritional-Estimation)
-
-**Phase 1 release label:** *Dataset Preprocessing and Implementation of Segmentation Models* — 本仓库在本阶段实际落地的是 **YOLOv8 边界框检测**与数据预处理；**实例分割 / 语义分割模型** 仍属后续规划（见文末 Roadmap）。
+Repository: [github.com/kermit0125/Ingredient-Based-Nutritional-Estimation](https://github.com/kermit0125/Ingredient-Based-Nutritional-Estimation)
 
 ---
 
-## Environment / 环境配置
+## Installation
 
-| Item | Recommendation |
-|------|----------------|
-| **OS** | Windows 10/11 or Linux (examples use Windows paths) |
-| **Python** | 3.10+ (tested with 3.13) |
-| **GPU** | NVIDIA GPU with CUDA; training script **requires** `torch.cuda.is_available()` |
-| **Python env** | `python -m venv .venv` then activate (`.venv\Scripts\activate` on Windows) |
+1. **Python** 3.10+ recommended. **Training** requires an NVIDIA GPU with CUDA.
 
-### Install PyTorch (CUDA)
+2. **PyTorch (CUDA)** — follow [pytorch.org](https://pytorch.org) for a command that matches your driver, for example:
 
-Install **CUDA-enabled PyTorch** first (version aligned with your driver), then project dependencies:
+   ```bash
+   pip install torch torchvision --index-url https://download.pytorch.org/whl/cu128
+   ```
 
-```bash
-# Example — check https://pytorch.org/ for the exact command for your CUDA version
-pip install torch torchvision --index-url https://download.pytorch.org/whl/cu128
-```
+3. **Project dependencies** (from the `backend` directory):
 
-Verify:
+   ```bash
+   cd Ingredient-Based-Nutritional-Estimation/backend
+   pip install -r requirements.txt
+   ```
 
-```bash
-python -c "import torch; print(torch.__version__, torch.cuda.is_available())"
-```
-
-### Install project dependencies
-
-```bash
-cd Ingredient-Based-Nutritional-Estimation/backend
-pip install -r requirements.txt
-```
-
-Core libraries: `ultralytics`, `opencv-python-headless`, `albumentations`, `numpy`, `PyYAML`, etc.
+4. **Raw data** — download and unpack per [`backend/data/DATA_SOURCES.md`](backend/data/DATA_SOURCES.md) under `backend/data/raw/` so paths match [`backend/configs/classes.yaml`](backend/configs/classes.yaml).
 
 ---
 
-## Download datasets / 下载数据
+## Training
 
-Two **Roboflow Universe** exports (**YOLOv8** zip). Exact names and links:
+Run all commands from **`backend/`**.
 
-- [`backend/data/DATA_SOURCES.md`](backend/data/DATA_SOURCES.md)
-
-Unpack under `backend/data/raw/` so paths match [`backend/configs/classes.yaml`](backend/configs/classes.yaml).
-
----
-
-## Build trainable data / 生成训练数据
-
-From **`backend/`**:
+### 1. Prepare data
 
 ```bash
 python scripts/filter_classes.py
@@ -68,113 +42,154 @@ python scripts/augment.py
 ```
 
 Optional: `python scripts/report_class_balance.py`  
-Optional nutrition CSV: `python scripts/build_nutrition_table.py`
+Optional: `python scripts/build_nutrition_table.py` (writes `data/nutrition_table.csv`)
 
-More detail: [`backend/data/README.md`](backend/data/README.md).
-
----
-
-## Training (YOLOv8 detection) / 训练方法
-
-**Working directory must be `backend/`** so dataset paths and run outputs stay consistent.
+### 2. Train object detection (YOLOv8)
 
 ```bash
-cd backend
 python models/train_detect.py
 ```
 
-- **Hyperparameters:** [`backend/configs/train_detect.yaml`](backend/configs/train_detect.yaml) only — edit epochs, batch, device, optimizer, `project`, `name`, etc.; **do not** hardcode these in the script.
-- **Dataset entry:** [`backend/data/splits/data.yaml`](backend/data/splits/data.yaml) — Ultralytics reads `train` (both `splits/train` and `augmented/train`), `val`, `test`, `nc`, `names`.
+Hyperparameters: `configs/train_detect.yaml`. Weights usually land at `runs/detect/exp1/weights/best.pt` (paths change if you edit `project` / `name` in the yaml).
 
-### Where trained models are saved / 训练完成后模型保存在哪里
+### 3. Train instance segmentation (YOLOv8-seg)
 
-After training finishes, Ultralytics writes under **`backend/`** (project path is resolved to the backend root in `models/train_detect.py`):
-
-| Path | Description |
-|------|-------------|
-| **`backend/runs/detect/<run_name>/weights/best.pt`** | **Best checkpoint** (default run name from config: **`exp1`** → `backend/runs/detect/exp1/weights/best.pt`). |
-| **`backend/runs/detect/<run_name>/weights/last.pt`** | Last epoch checkpoint. |
-| **`backend/runs/detect/<run_name>/`** | Training curves, `results.csv`, `args.yaml`, batch preview images, **`confusion_matrix.png`**, **`BoxPR_curve.png`**, **`BoxP_curve.png`**, **`BoxR_curve.png`**, **`BoxF1_curve.png`**, `results.png`, etc. |
-
-**These files are gitignored** (`runs/`, `*.pt`). They only exist **on your machine** after you train.
-
----
-
-## Evaluation / 评估
-
-After `best.pt` exists:
+Convert detection labels to polygon labels for segmentation training:
 
 ```bash
-cd backend
-python models/evaluate.py
-# or: python models/evaluate.py --weights runs/detect/exp1/weights/best.pt
+python scripts/convert_detect_labels_to_seg.py
 ```
 
-Produces metrics on **val**, per-class AP, checks `nutrition_table.csv`, and saves sample predictions under `runs/detect/exp1/eval_viz/` (gitignored).
-
-Running `model.val()` may also create an additional folder such as `runs/detect/val2/` for that validation run.
-
----
-
-## Demo inference / 单图演示
+If you use augmentation and want the segmentation train set to include it:
 
 ```bash
-cd backend
-python models/demo_inference.py --image path/to/image.jpg
+python scripts/convert_detect_labels_to_seg.py --include-augmented
 ```
 
-Uses `best.pt` and `data/nutrition_table.csv` by default.
-
----
-
-## Visualization dashboard / 结果展示页
-
-Open [`Visualization/index.html`](Visualization/index.html) in a browser. It references charts under `../backend/runs/detect/` (local only). If images do not load with `file://`, serve the repo root:
+Then train:
 
 ```bash
-# from repository root
-python -m http.server 8080
-# then open http://localhost:8080/Visualization/
+python models/train_seg.py
 ```
 
----
-
-## Documentation / 文档
-
-| Document | Content |
-|----------|---------|
-| [`Documents/phase1_analysis_report.md`](Documents/phase1_analysis_report.md) | Phase 1 methodology, metrics summary, limitations |
-| [`Documents/workspace_doc.md`](Documents/workspace_doc.md) | Workspace notes |
-| [`Documents/api_doc.md`](Documents/api_doc.md) | API spec (evolving) |
-| [`backend/data/README.md`](backend/data/README.md) | Data layout & training YAML rules |
+Hyperparameters: `configs/train_seg.yaml`. Weights usually land at `runs/segment/exp1/weights/best.pt`.
 
 ---
 
-## Progress / 当前进度
+## Testing and usage
 
-| Area | Status |
-|------|--------|
-| 10-class merge, `classes.yaml`, filter / split / augment pipeline | Done |
-| `train_detect.yaml` + `train_detect.py` + `data/splits/data.yaml` | Done |
-| `evaluate.py`, `demo_inference.py`, `build_nutrition_table.py` | Done |
-| `Visualization/index.html` report page | Done |
-| Segmentation models, portion estimation, FastAPI, frontend | Planned |
+### Detection metrics and visualizations
+
+```bash
+python models/evaluate.py --weights runs/detect/exp1/weights/best.pt
+```
+
+### Single image: detection + per-100g nutrition (boxes)
+
+```bash
+python models/demo_inference.py --image path/to/image.jpg --weights runs/detect/exp1/weights/best.pt
+```
+
+### Single image: mass estimate + per-instance and full-image macros (segmentation weights recommended)
+
+```bash
+python models/inference.py --image path/to/image.jpg --weights runs/segment/exp1/weights/best.pt
+```
+
+If segmentation weights are not ready yet, you can temporarily point to **detection** weights (box area as a proxy; weaker than masks):
+
+```bash
+python models/inference.py --image path/to/image.jpg --weights runs/detect/exp1/weights/best.pt
+```
+
+### Validate the segmentation model (requires trained segmentation weights)
+
+```bash
+yolo segment val model=runs/segment/exp1/weights/best.pt data=data/splits_seg/data.yaml
+```
+
+### HTTP service
+
+```bash
+uvicorn api.main:app --host 0.0.0.0 --port 8000
+```
+
+- `GET /health` — health check  
+- `GET /classes` — class list and reference gram weights  
+- `POST /predict` — multipart form field `image` (JPG/PNG)  
+
+Optional environment variables: `INE_SEG_WEIGHTS` (path to `.pt`), `INE_CONF` (score threshold, default `0.5`).
+
+### Calibrating mass estimates
+
+Edit per-class reference grams in `backend/nutrition/reference_weights.py`. For limitations and improvement ideas, see **Mass estimation accuracy** below.
 
 ---
 
-## Repository layout / 目录说明
+## Model results and analysis
 
-| Path | Content |
-|------|---------|
-| `backend/configs/` | `classes.yaml`, `train_detect.yaml` |
-| `backend/models/` | `train_detect.py`, `evaluate.py`, `demo_inference.py` |
-| `backend/scripts/` | Data pipeline scripts |
-| `backend/data/` | `README.md`, `DATA_SOURCES.md`, tracked YAML stubs; **large image dirs ignored** |
-| `Visualization/` | Static HTML dashboard for local metrics / plots |
-| `Documents/` | PRD, API notes, **Phase 1 analysis report** |
+### Detection model (YOLOv8m)
+
+The table below summarizes **one representative validation run** recorded in [`Documents/phase1_analysis_report.md`](Documents/phase1_analysis_report.md) (command: `python models/evaluate.py`). **Numbers shift with random seed and training**—treat your local `evaluate.py` output and `runs/detect/.../results.csv` as authoritative.
+
+| Metric (val) | Example value |
+|--------------|----------------|
+| mAP@0.5 | ~0.954 |
+| Mean precision | ~0.957 |
+| Mean recall | ~0.901 |
+| vs. common target mAP@0.5 ≥ 0.60 | Pass |
+
+**Per-class (same run):** Most classes show high AP@0.5; in this snapshot **cucumber** is relatively lower (~0.76) but still above the usual 0.50 warning line in the eval script. If a class stays low, add data or augmentation and cross-check with `report_class_balance.py`.
+
+### Segmentation model
+
+Mask mAP and training curves live under local `runs/segment/...` (not committed by default). After training, run:
+
+```bash
+yolo segment val model=runs/segment/exp1/weights/best.pt data=data/splits_seg/data.yaml
+```
+
+and keep your own notes; the repo does **not** pin every segmentation experiment’s numbers.
+
+### Takeaways
+
+- **Detection:** After merging two sources, stratified splits, and targeted augmentation, overall val metrics are strong; tail classes can still improve.  
+- **Mass and nutrition:** Derived from `(mask or box area / full image) × reference grams` plus the nutrition table—**not the same notion of accuracy as detection mAP**; masses can be far off even when boxes are good (see next section).
 
 ---
 
-## License / 许可
+## Mass estimation accuracy
 
-See repository default; course project — use per instructor requirements.
+Reported **grams are estimates only**; accuracy is limited. Treat outputs as **reference-level**, not a substitute for a scale. Main reasons:
+
+1. **No large image↔ground-truth mass dataset** — `nutrition/reference_weights.py` uses per-class reference masses as **heuristic defaults**, **not** calibrated to your camera height, focal length, tabletop, or lighting.  
+2. **Idealized geometry** — the formula assumes ingredients lie on a **common plane** and that visible area scales with edible mass; tilt, stacking, and occlusion break that.  
+3. **Segmentation supervision** — if polygons come from **boxes**, masks are weaker than true instance masks and **area ratios can be biased**.  
+4. **Static nutrition table** — per-100g values ignore cultivar, ripeness, water content, etc.; error stacks on top of mass error.
+
+### Possible improvements
+
+| Direction | Idea |
+|-----------|------|
+| **Scene / reference-mass calibration** | Under a fixed camera pose, fit per-class scale factors (or a global scale) from a few weighed samples; iterate `reference_weights.py`. |
+| **In-frame reference objects** | Use a known-size target to map pixels to real length, then add simple thickness/volume assumptions. |
+| **Depth / stereo** | RGB-D, binocular, or monocular depth plus a coarse volume model instead of flat area ratio. |
+| **Better mask labels** | Train on real polygon/mask annotations to reduce box-as-mask error. |
+| **Learned portion regression** | Weak/strong mass or volume labels on a head over the detector/segmenter backbone. |
+| **Interactive calibration** | Let users enter total mass or a multiplier; tune references or per-user settings from feedback. |
+
+---
+
+## Repository layout
+
+| Path | Role |
+|------|------|
+| `backend/configs/` | Classes and training configs |
+| `backend/data/` | Data and nutrition CSV (large blobs usually local-only) |
+| `backend/models/` | Train, evaluate, and inference scripts |
+| `backend/nutrition/` | Reference masses and macro math |
+| `backend/scripts/` | Data and label pipelines |
+| `backend/api/` | FastAPI entrypoint |
+| `Visualization/` | Static dashboard for local training plots |
+
+See also `Documents/` and `backend/data/README.md`.

@@ -4,3 +4,6 @@ opencv-python-headless>=4.8
 albumentations>=1.4.0
 iterative-stratification>=0.1.9
 ultralytics>=8.0.0
+fastapi>=0.110.0
+uvicorn[standard]>=0.27.0
+python-multipart>=0.0.9

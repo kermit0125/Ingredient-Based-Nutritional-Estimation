@@ -1,11 +1,3 @@
-"""
-训练完成后评估：验证集整体指标、逐类 AP、test 集每类随机可视化；校验 nutrition_table.csv 覆盖全部类别。
-
-从 backend/ 运行:
-    python models/evaluate.py
-    python models/evaluate.py --weights runs/detect/exp1/weights/best.pt
-"""
-
 from __future__ import annotations
 
 import argparse
@@ -39,7 +31,6 @@ def _load_names_from_data_yaml(data_yaml: Path) -> list[str]:
 def _collect_test_images_by_class(
     data_yaml: Path,
 ) -> dict[int, list[Path]]:
-    """Parse YOLO data yaml and scan test labels for class ids -> image paths."""
     from ultralytics.data.utils import check_det_dataset
 
     data = check_det_dataset(str(data_yaml))
@@ -100,15 +91,10 @@ def _verify_nutrition(names: list[str]) -> None:
 
 def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--weights", type=Path, default=DEFAULT_WEIGHTS, help="best.pt path")
-    ap.add_argument("--data", type=Path, default=DEFAULT_DATA, help="dataset yaml")
-    ap.add_argument(
-        "--project",
-        type=Path,
-        default=BACKEND_ROOT / "runs" / "detect" / "exp1",
-        help="run dir (for eval_viz output)",
-    )
-    ap.add_argument("--name", type=str, default="eval_viz", help="subfolder under project for viz")
+    ap.add_argument("--weights", type=Path, default=DEFAULT_WEIGHTS)
+    ap.add_argument("--data", type=Path, default=DEFAULT_DATA)
+    ap.add_argument("--project", type=Path, default=BACKEND_ROOT / "runs" / "detect" / "exp1")
+    ap.add_argument("--name", type=str, default="eval_viz")
     ap.add_argument("--seed", type=int, default=42)
     args = ap.parse_args()
 

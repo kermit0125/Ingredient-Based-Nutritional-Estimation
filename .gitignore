@@ -39,7 +39,14 @@ backend/data/splits/train/
 backend/data/splits/val/
 backend/data/splits/test/
 backend/data/augmented/
+backend/data/splits_seg/
+# Regenerate splits_seg with: python scripts/convert_detect_labels_to_seg.py
+
 # dataset YAML templates are tracked; image/label dirs above stay ignored
 
 # Optional local validation outputs
 backend/test/
+
+# Local test photos
+backend/testimage.jpg
+testimage.jpg

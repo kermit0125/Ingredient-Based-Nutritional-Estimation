@@ -1,11 +1,3 @@
-"""
-Level 1 推理演示：单张图 -> 带框的标注图 + 每个检测类别的每 100g 营养值（来自 nutrition_table.csv）。
-
-从 backend/ 运行:
-    python models/demo_inference.py --image path/to.jpg
-    python models/demo_inference.py --image path/to.jpg --weights runs/detect/exp1/weights/best.pt
-"""
-
 from __future__ import annotations
 
 import argparse
@@ -20,7 +12,7 @@ _SCRIPTS = BACKEND_ROOT / "scripts"
 if str(_SCRIPTS) not in sys.path:
     sys.path.insert(0, str(_SCRIPTS))
 
-from dataset_common import load_classes_config  # noqa: E402
+from dataset_common import load_classes_config
 
 DEFAULT_WEIGHTS = BACKEND_ROOT / "runs" / "detect" / "exp1" / "weights" / "best.pt"
 NUTRITION_CSV = BACKEND_ROOT / "data" / "nutrition_table.csv"
@@ -48,7 +40,7 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--image", type=Path, required=True)
     ap.add_argument("--weights", type=Path, default=DEFAULT_WEIGHTS)
-    ap.add_argument("--out", type=Path, default=None, help="output image path")
+    ap.add_argument("--out", type=Path, default=None)
     args = ap.parse_args()
 
     img_path = args.image.resolve()

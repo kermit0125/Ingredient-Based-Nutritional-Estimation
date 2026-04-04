@@ -1,11 +1,3 @@
-"""
-从 USDA FoodData Central (FDC) 常见 raw 食材条目汇总每 100g 营养值，写入 data/nutrition_table.csv。
-与 configs/classes.yaml 中 canonical 10 类顺序一致；不依赖训练或模型。
-
-运行（在 backend/）:
-    python scripts/build_nutrition_table.py
-"""
-
 from __future__ import annotations
 
 import csv
@@ -15,8 +7,6 @@ from pathlib import Path
 BACKEND_ROOT = Path(__file__).resolve().parent.parent
 OUT_PATH = BACKEND_ROOT / "data" / "nutrition_table.csv"
 
-# Canonical 顺序须与 classes.yaml names 0..9 一致。
-# 数值来自 USDA 标准参考/常见 FDC 条目（raw），约 100g 可食部分。
 USDA_PER_100G = [
     {
         "canonical_name": "bell_pepper",

@@ -7,7 +7,7 @@ import torch
 import yaml
 
 BACKEND_ROOT = Path(__file__).resolve().parent.parent
-CONFIG_PATH = BACKEND_ROOT / "configs" / "train_detect.yaml"
+CONFIG_PATH = BACKEND_ROOT / "configs" / "train_seg.yaml"
 
 
 def _resolve_path(p: str | Path) -> Path:
@@ -24,7 +24,7 @@ def main() -> None:
 
     cfg = yaml.safe_load(CONFIG_PATH.read_text(encoding="utf-8"))
     if not isinstance(cfg, dict):
-        print("train_detect.yaml must be a mapping", file=sys.stderr)
+        print("train_seg.yaml must be a mapping", file=sys.stderr)
         sys.exit(1)
 
     model_name = cfg.get("model")
@@ -40,12 +40,13 @@ def main() -> None:
     data_path = _resolve_path(data_rel)
     if not data_path.is_file():
         print(f"Dataset yaml not found: {data_path}", file=sys.stderr)
+        print("Run: python scripts/convert_detect_labels_to_seg.py", file=sys.stderr)
         sys.exit(1)
 
     train_kwargs = {k: v for k, v in cfg.items() if k != "model"}
     train_kwargs["data"] = str(data_path)
 
-    proj = train_kwargs.get("project", "runs/detect")
+    proj = train_kwargs.get("project", "runs/segment")
     if proj and not Path(str(proj)).is_absolute():
         train_kwargs["project"] = str((BACKEND_ROOT / proj).resolve())
 
@@ -56,7 +57,7 @@ def main() -> None:
     model = YOLO(model_arg)
     model.train(**train_kwargs)
 
-    project = Path(str(train_kwargs.get("project", str(BACKEND_ROOT / "runs/detect"))))
+    project = Path(str(train_kwargs.get("project", str(BACKEND_ROOT / "runs/segment"))))
     if not project.is_absolute():
         project = (BACKEND_ROOT / project).resolve()
     name = str(train_kwargs.get("name", "exp"))

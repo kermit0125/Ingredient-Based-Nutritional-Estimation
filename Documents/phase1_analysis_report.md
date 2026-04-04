@@ -61,8 +61,9 @@ Per-class AP@0.5 (example run): strongest classes ~0.95–0.99; **cucumber** low
 
 ## 6. Limitations & next steps / 局限与后续
 
-- Level 1: **macros per 100 g** from table; **no** automatic portion mass from pixels.  
-- Phase 2 (planned): portion / mass estimation + total nutrition (see project PRD / course scope).
+- 本报告阶段以 **Level 1 检测 + 每 100 g 营养查询** 为主。  
+- **仓库当前状态（代码）**：已增加实例分割训练入口、掩码/框面积比估重、`nutrition/` 模块、`models/inference.py` 与 `api/main.py`（详见根目录 `README.md`、`Documents/workspace_doc.md`、`Documents/api_doc.md`）。估重仍为启发式，精度受参考克重与拍摄条件限制。  
+- 分割与端到端营养指标的固定数字需在本地 `runs/segment/...` 与 `yolo segment val` 中记录，不随 Git 提交。
 
 ---
 
