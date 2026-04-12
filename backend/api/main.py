@@ -9,6 +9,8 @@ import cv2
 import numpy as np
 from fastapi import FastAPI, File, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 
 BACKEND_ROOT = Path(__file__).resolve().parent.parent
 if str(BACKEND_ROOT) not in sys.path:
@@ -22,6 +24,7 @@ from models.inference import DEFAULT_SEG_WEIGHTS, run_predict
 from nutrition.reference_weights import REFERENCE_WEIGHT_G
 
 logger = logging.getLogger("ine.api")
+STATIC_DIR = Path(__file__).resolve().parent / "static"
 
 app = FastAPI(title="Ingredient Nutrition Estimator", version="1.1.0")
 app.add_middleware(
@@ -31,6 +34,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
 
 def _weights_path() -> Path:
@@ -46,6 +50,11 @@ def _conf() -> float:
         return float(os.environ.get("INE_CONF", "0.5"))
     except ValueError:
         return 0.5
+
+
+@app.get("/", include_in_schema=False)
+def index() -> FileResponse:
+    return FileResponse(STATIC_DIR / "index.html")
 
 
 @app.get("/health")
@@ -91,6 +100,12 @@ def predict(image: UploadFile = File(...)) -> dict:
 
     try:
         out = run_predict(im, weights=wpath, conf=_conf())
+    except ModuleNotFoundError as e:
+        logger.exception("missing runtime dependency: %s", e)
+        raise HTTPException(
+            status_code=503,
+            detail=f"后端缺少运行依赖：{e.name}。请先安装 backend/requirements.txt 中的依赖",
+        ) from e
     except Exception as e:
         logger.exception("predict failed: %s", e)
         raise HTTPException(status_code=500, detail="系统异常，请联系开发者") from e

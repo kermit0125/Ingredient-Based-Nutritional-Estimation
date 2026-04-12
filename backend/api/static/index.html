@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Ingredient Nutrition Estimator</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/static/styles.css" />
+</head>
+<body>
+  <div class="page-shell">
+    <div class="ambient ambient-a"></div>
+    <div class="ambient ambient-b"></div>
+    <header class="hero">
+      <div class="hero-copy">
+        <p class="eyebrow">FastAPI + Web Demo</p>
+        <h1>Ingredient photo in, segmented nutrition report out.</h1>
+        <p class="hero-text">
+          Upload a JPG or PNG of raw ingredients to get the annotated segmentation result,
+          per-ingredient macro estimates, and a visual macronutrient ratio chart from the live backend.
+        </p>
+        <div class="status-row">
+          <span class="status-pill" id="healthBadge">Checking API</span>
+          <span class="status-meta" id="classesSummary">Loading supported classes...</span>
+        </div>
+      </div>
+    </header>
+
+    <main class="layout">
+      <section class="panel upload-panel">
+        <div class="section-head">
+          <div>
+            <p class="section-kicker">Step 1</p>
+            <h2>Upload Ingredient Photo</h2>
+          </div>
+          <p class="section-note">Recommended: clear top-down images, at least 300×300, under 10 MB.</p>
+        </div>
+
+        <form id="uploadForm" class="upload-form">
+          <label class="dropzone" for="imageInput" id="dropzone">
+            <input id="imageInput" name="image" type="file" accept="image/png,image/jpeg" />
+            <span class="dropzone-title">Drop an image here or click to browse</span>
+            <span class="dropzone-subtitle">The frontend sends the file directly to the FastAPI backend.</span>
+          </label>
+          <div class="actions">
+            <button class="primary-btn" type="submit" id="analyzeBtn">Analyze Image</button>
+            <button class="ghost-btn" type="button" id="resetBtn">Reset</button>
+          </div>
+        </form>
+
+        <div class="feedback" id="feedback" hidden></div>
+      </section>
+
+      <section class="results-grid">
+        <div class="results-main">
+          <article class="panel preview-panel">
+            <div class="section-head">
+              <div>
+                <p class="section-kicker">Step 2</p>
+                <h2>Preview and Annotation</h2>
+              </div>
+            </div>
+            <div class="image-compare">
+              <figure class="image-card">
+                <figcaption>Original Upload</figcaption>
+                <img id="previewImage" alt="Uploaded ingredient preview" />
+                <div class="image-empty" id="previewEmpty">No image selected yet.</div>
+              </figure>
+              <figure class="image-card">
+                <figcaption>Segmentation Result</figcaption>
+                <img id="resultImage" alt="Segmentation annotated result" />
+                <div class="image-empty" id="resultEmpty">Annotated output will appear here.</div>
+              </figure>
+            </div>
+          </article>
+
+          <article class="panel table-panel">
+            <div class="section-head">
+              <div>
+                <p class="section-kicker">Step 4</p>
+                <h2>Per-Ingredient Breakdown</h2>
+              </div>
+              <p class="section-note">Each row is one detected instance returned by the API.</p>
+            </div>
+
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Ingredient</th>
+                    <th>Confidence</th>
+                    <th>Weight (g)</th>
+                    <th>Calories</th>
+                    <th>Carbs (g)</th>
+                    <th>Protein (g)</th>
+                    <th>Fat (g)</th>
+                    <th>Area Ratio</th>
+                  </tr>
+                </thead>
+                <tbody id="resultsTableBody">
+                  <tr class="empty-row">
+                    <td colspan="8">Run an image through the model to populate the table.</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </article>
+        </div>
+
+        <article class="panel summary-panel">
+          <div class="section-head">
+            <div>
+              <p class="section-kicker">Step 3</p>
+              <h2>Nutrition Summary</h2>
+            </div>
+            <p class="section-note">Totals are aggregated from all detected ingredients.</p>
+          </div>
+          <div class="totals-grid">
+            <div class="metric-card">
+              <span>Calories</span>
+              <strong id="totalCalories">0</strong>
+              <small>kcal</small>
+            </div>
+            <div class="metric-card">
+              <span>Carbs</span>
+              <strong id="totalCarbs">0</strong>
+              <small>g</small>
+            </div>
+            <div class="metric-card">
+              <span>Protein</span>
+              <strong id="totalProtein">0</strong>
+              <small>g</small>
+            </div>
+            <div class="metric-card">
+              <span>Fat</span>
+              <strong id="totalFat">0</strong>
+              <small>g</small>
+            </div>
+          </div>
+
+          <div class="chart-card">
+            <div class="chart-head">
+              <h3>Macronutrient Ratio</h3>
+              <div class="chart-toggle" role="tablist" aria-label="Chart type">
+                <button class="chart-toggle-btn active" type="button" data-chart="pie">Pie</button>
+                <button class="chart-toggle-btn" type="button" data-chart="bar">Bar</button>
+              </div>
+            </div>
+            <svg id="macroChart" viewBox="0 0 320 240" aria-label="Macronutrient ratio chart"></svg>
+            <div class="chart-legend" id="chartLegend"></div>
+          </div>
+        </article>
+      </section>
+    </main>
+  </div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
