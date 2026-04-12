@@ -71,6 +71,11 @@
 }
 ```
 
+### 前端演示页
+
+- `GET /`：返回内置 Web 前端页面，用于上传食材图片并联调 `/predict`
+- `GET /static/...`：前端静态资源（HTML 引用的 CSS / JS）
+
 ---
 
 ## 3. GET /classes
