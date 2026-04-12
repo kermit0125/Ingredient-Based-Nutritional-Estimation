@@ -92,6 +92,7 @@
 ### `api/`
 
 `main.py` 内挂载 FastAPI 应用：详见 `Documents/api_doc.md`（与实现一致的版本）。
+同时提供 `/` 前端演示页与 `/static/` 静态资源，用于完整联调展示上传、标注图、营养表和宏量图表。
 
 ### `configs/`
 
