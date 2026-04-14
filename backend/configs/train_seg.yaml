@@ -23,4 +23,5 @@ plots: true
 save: true
 
 project: runs/segment
-name: exp1
+# After refreshing data, use a new name so previous runs stay untouched.
+name: veg_seg_v5

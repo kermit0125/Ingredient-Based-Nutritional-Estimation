@@ -6,6 +6,15 @@
 
 仓库：[github.com/kermit0125/Ingredient-Based-Nutritional-Estimation](https://github.com/kermit0125/Ingredient-Based-Nutritional-Estimation)
 
+### 分支 `Instance-Segmentationn`
+
+Git 分支名不能含空格，本仓库使用 **`Instance-Segmentationn`**。该分支包含**独立三类实例分割**流程（西兰花 / 黄瓜 / 番茄）：`prepare_veg_seg3_dataset.py`、`augment_veg_seg3.py`、`train_seg_veg3.py`、`evaluate_seg_veg3.py` 与 `configs/train_seg_veg3.yaml`。大数据与权重（`backend/data/raw/`、`backend/data/veg_seg_3class/`、`runs/`、`*.pt`）已 **gitignore**，克隆后需在本地放入 Roboflow 数据并重新生成与训练。
+
+```bash
+git fetch origin
+git checkout Instance-Segmentationn
+```
+
 ---
 
 ## 安装
@@ -72,7 +81,9 @@ python scripts/convert_detect_labels_to_seg.py --include-augmented
 python models/train_seg.py
 ```
 
-超参数见 `configs/train_seg.yaml`。完成后权重一般在 `runs/segment/exp1/weights/best.pt`。
+超参数见 `configs/train_seg.yaml`。完成后权重一般在 `runs/segment/veg_seg_v5/weights/best.pt`（可在 yaml 里改 `name`）。
+
+**仅三类蔬菜的独立分割模型**（西兰花/黄瓜/番茄，多边形数据集）：见 `backend/data/README.md` —— `prepare_veg_seg3_dataset.py` → `augment_veg_seg3.py` → `train_seg_veg3.py` → `evaluate_seg_veg3.py`。
 
 ---
 
@@ -93,7 +104,7 @@ python models/demo_inference.py --image path/to/image.jpg --weights runs/detect/
 ### 单图：估重 + 实例与全图营养（推荐分割权重）
 
 ```bash
-python models/inference.py --image path/to/image.jpg --weights runs/segment/exp1/weights/best.pt
+python models/inference.py --image path/to/image.jpg --weights runs/segment/veg_seg_v5/weights/best.pt
 ```
 
 暂无分割权重时，可临时指定**检测**权重（以框面积近似，精度弱于掩码）：
@@ -105,7 +116,7 @@ python models/inference.py --image path/to/image.jpg --weights runs/detect/exp1/
 ### 分割模型验证（需已存在分割权重）
 
 ```bash
-yolo segment val model=runs/segment/exp1/weights/best.pt data=data/splits_seg/data.yaml
+python models/evaluate_seg.py --weights runs/segment/veg_seg_v5/weights/best.pt --data data/splits_seg/data.yaml --split test
 ```
 
 ### HTTP 服务
@@ -146,7 +157,7 @@ uvicorn api.main:app --host 0.0.0.0 --port 8000
 掩码 mAP、训练曲线等位于本机 `runs/segment/...`（默认不入库）。训练结束后执行：
 
 ```bash
-yolo segment val model=runs/segment/exp1/weights/best.pt data=data/splits_seg/data.yaml
+python models/evaluate_seg.py --weights runs/segment/veg_seg_v5/weights/best.pt --data data/splits_seg/data.yaml --split test
 ```
 
 请自行记录终端与 `runs/segment/...` 中的指标；仓库**不固定存档**每一次分割实验数字。

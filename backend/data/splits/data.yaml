@@ -1,5 +1,3 @@
-# Ultralytics 数据集入口（位于 data/splits/）。
-# 省略 path：根目录为本文件所在目录（data/splits/），下列相对路径指向 data/ 下各目录。
 train:
   - ../splits/train/images
   - ../augmented/train/images

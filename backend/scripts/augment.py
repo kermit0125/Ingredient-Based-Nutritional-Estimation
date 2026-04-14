@@ -55,6 +55,9 @@ def read_yolo_labels(path: Path) -> tuple[list[list[float]], list[int]]:
         parts = line.split()
         if len(parts) < 5:
             continue
+        # Instance-segmentation polygons: class + >= 6 normalized coords (pairs). Skip here — bbox aug cannot warp polygons.
+        if len(parts) > 5:
+            continue
         try:
             c = int(float(parts[0]))
             bb = [float(x) for x in parts[1:5]]

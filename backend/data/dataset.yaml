@@ -1,5 +1,3 @@
-# YOLO Ultralytics — yaml 位于 backend/data/，省略 path 则根目录为本文件目录（data/）。
-# train: splits 原始 + augmented 增补。
 train:
   - splits/train/images
   - augmented/train/images

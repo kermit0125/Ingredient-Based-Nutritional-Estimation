@@ -6,6 +6,15 @@ This project identifies **raw ingredient** categories from photos, estimates eac
 
 Repository: [github.com/kermit0125/Ingredient-Based-Nutritional-Estimation](https://github.com/kermit0125/Ingredient-Based-Nutritional-Estimation)
 
+### Branch `Instance-Segmentationn`
+
+Git branch names cannot contain spaces; this branch uses **`Instance-Segmentationn`**. It carries the **standalone 3-class instance segmentation** workflow (broccoli, cucumber, tomato): `scripts/prepare_veg_seg3_dataset.py`, `scripts/augment_veg_seg3.py`, `models/train_seg_veg3.py`, `models/evaluate_seg_veg3.py`, and `configs/train_seg_veg3.yaml`. Large blobs (`backend/data/raw/`, `backend/data/veg_seg_3class/`, `runs/`, `*.pt`) are **gitignored**; clone this branch, add the Roboflow zip locally, then regenerate data and train.
+
+```bash
+git fetch origin
+git checkout Instance-Segmentationn
+```
+
 ---
 
 ## Installation
@@ -72,7 +81,9 @@ Then train:
 python models/train_seg.py
 ```
 
-Hyperparameters: `configs/train_seg.yaml`. Weights usually land at `runs/segment/exp1/weights/best.pt`.
+Hyperparameters: `configs/train_seg.yaml`. Weights usually land at `runs/segment/<name>/weights/best.pt` (default run name `veg_seg_v5`; change `name` in the yaml to avoid overwriting).
+
+**Standalone 3-class veg segmentation** (broccoli/cucumber/tomato only, polygon dataset): see [`backend/data/README.md`](backend/data/README.md) — `prepare_veg_seg3_dataset.py` → `augment_veg_seg3.py` → `train_seg_veg3.py` → `evaluate_seg_veg3.py`.
 
 ---
 
@@ -93,7 +104,7 @@ python models/demo_inference.py --image path/to/image.jpg --weights runs/detect/
 ### Single image: mass estimate + per-instance and full-image macros (segmentation weights recommended)
 
 ```bash
-python models/inference.py --image path/to/image.jpg --weights runs/segment/exp1/weights/best.pt
+python models/inference.py --image path/to/image.jpg --weights runs/segment/veg_seg_v5/weights/best.pt
 ```
 
 If segmentation weights are not ready yet, you can temporarily point to **detection** weights (box area as a proxy; weaker than masks):
@@ -105,8 +116,10 @@ python models/inference.py --image path/to/image.jpg --weights runs/detect/exp1/
 ### Validate the segmentation model (requires trained segmentation weights)
 
 ```bash
-yolo segment val model=runs/segment/exp1/weights/best.pt data=data/splits_seg/data.yaml
+python models/evaluate_seg.py --weights runs/segment/veg_seg_v5/weights/best.pt --data data/splits_seg/data.yaml --split test
 ```
+
+Equivalent: `yolo segment val model=runs/segment/veg_seg_v5/weights/best.pt data=data/splits_seg/data.yaml split=test`
 
 ### HTTP service
 
@@ -143,17 +156,11 @@ The table below summarizes **one representative validation run** recorded in [`D
 
 ### Segmentation model
 
-Mask mAP and training curves live under local `runs/segment/...` (not committed by default). After training, run:
-
-```bash
-yolo segment val model=runs/segment/exp1/weights/best.pt data=data/splits_seg/data.yaml
-```
-
-and keep your own notes; the repo does **not** pin every segmentation experiment’s numbers.
+Mask mAP and training curves live under local `runs/segment/...` (not committed by default). After training, run `python models/evaluate_seg.py` (val/test) or `yolo segment val` as in the section above, and keep your own notes; the repo does **not** pin every segmentation experiment’s numbers.
 
 ### Takeaways
 
-- **Detection:** After merging two sources, stratified splits, and targeted augmentation, overall val metrics are strong; tail classes can still improve.  
+- **Detection:** After merging Roboflow sources (per `classes.yaml`), stratified splits, and targeted augmentation, overall val metrics are strong; tail classes can still improve.  
 - **Mass and nutrition:** Derived from `(mask or box area / full image) × reference grams` plus the nutrition table—**not the same notion of accuracy as detection mAP**; masses can be far off even when boxes are good (see next section).
 
 ---

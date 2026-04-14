@@ -20,7 +20,7 @@ from dataset_common import load_classes_config
 from nutrition.nutrition_calculator import load_nutrition_table, macros_for_weight
 from nutrition.weight_estimator import estimate_weight_from_mask_area
 
-DEFAULT_SEG_WEIGHTS = BACKEND_ROOT / "runs" / "segment" / "exp1" / "weights" / "best.pt"
+DEFAULT_SEG_WEIGHTS = BACKEND_ROOT / "runs" / "segment" / "veg_seg_v5" / "weights" / "best.pt"
 
 _nutrition_cache: Any = None
 

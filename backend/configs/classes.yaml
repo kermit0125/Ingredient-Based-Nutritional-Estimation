@@ -1,6 +1,7 @@
 # Unified 10-class detection labels (shared by scripts/ and training configs).
 # ds1: FOOD-INGREDIENTS (Roboflow names, mixed English / regional).
 # ds2: Food ingredient recognition (lowercase names).
+# ds_veg_seg: vegetables-f4ale v5 — instance segmentation polygons (Broccoli/Cucumber/Tomato).
 # Garlic and chilli are excluded: typical serving amounts yield negligible macro totals for nutrition estimation.
 nc: 10
 names:
@@ -46,3 +47,10 @@ sources:
       cucumber: cucumber
       corn: corn
       egg: egg
+  ds_veg_seg:
+    path: data/raw/Vegetables.v5-danya.yolov8
+    file_prefix: vegseg_
+    raw_to_canonical:
+      Broccoli: broccoli
+      Cucumber: cucumber
+      Tomato: tomato

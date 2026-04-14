@@ -57,7 +57,7 @@
 | `INE_SEG_WEIGHTS` | 推理用 `.pt` 路径（绝对或与 `backend` 相对的相对路径） |
 | `INE_CONF` | 置信度阈值，默认 `0.5` |
 
-未设置 `INE_SEG_WEIGHTS` 时，默认使用 `backend/runs/segment/exp1/weights/best.pt`（若文件不存在则 `503`）。
+未设置 `INE_SEG_WEIGHTS` 时，默认使用 `backend/runs/segment/veg_seg_v5/weights/best.pt`（若文件不存在则 `503`）。
 
 ---
 

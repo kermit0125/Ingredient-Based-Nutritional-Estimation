@@ -59,7 +59,7 @@
         └── augmented_seg/      # 可选，与 --include-augmented 对应
 ```
 
-训练产物路径示例（以默认 yaml 为准）：`backend/runs/detect/exp1/weights/best.pt`、`backend/runs/segment/exp1/weights/best.pt`。
+训练产物路径示例（以默认 yaml 为准）：`backend/runs/detect/exp1/weights/best.pt`、`backend/runs/segment/veg_seg_v5/weights/best.pt`（分割实验名见 `configs/train_seg.yaml` 的 `name`）。
 
 ---
 

@@ -39,6 +39,7 @@ backend/data/splits/train/
 backend/data/splits/val/
 backend/data/splits/test/
 backend/data/augmented/
+backend/data/veg_seg_3class/
 backend/data/splits_seg/
 # Regenerate splits_seg with: python scripts/convert_detect_labels_to_seg.py
 
